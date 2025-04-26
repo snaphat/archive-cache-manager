@@ -299,8 +299,8 @@ Dependencies are listed below, and can be installed using Visual Studio's Packag
 Package               | Version | PM Command
 ----------------------|---------|--------------------------
 System.Drawing.Common | 4.7.2   | `Install-Package System.Drawing.Common -Version 4.7.2 -ProjectName Plugin`
-ini-parser            | latest  | `Install-Package ini-parser -ProjectName Core`
-ini-parser            | latest  | `Install-Package ini-parser -ProjectName Plugin`
+ini-parser            | latest  | `Install-Package ini-parser-netstandard -ProjectName Core`
+ini-parser            | latest  | `Install-Package ini-parser-netstandard -ProjectName Plugin`
 Octokit               | latest  | `Install-Package Octokit -ProjectName Plugin`
 
 

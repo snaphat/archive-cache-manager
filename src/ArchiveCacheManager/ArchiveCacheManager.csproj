@@ -1,84 +1,49 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{687F96D0-DFB8-4A53-BF23-AA02BD7658EC}</ProjectGuid>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ArchiveCacheManager</RootNamespace>
-    <AssemblyName>ArchiveCacheManager</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Project>{035823e0-c80b-49bf-9fad-9c65ea45e3a9}</Project>
-      <Name>Core</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Plugin\Plugin.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir c:\LaunchBox\Plugins\ArchiveCacheManager
-copy /Y $(TargetPath) c:\LaunchBox\Plugins\ArchiveCacheManager
-mkdir $(SolutionDir)..\release\ArchiveCacheManager
-copy /Y $(TargetPath) $(SolutionDir)..\release\ArchiveCacheManager
-copy /Y  $(SolutionDir)..\README.md $(SolutionDir)..\release\ArchiveCacheManager\readme.txt
-copy /Y  $(SolutionDir)..\HISTORY.md $(SolutionDir)..\release\ArchiveCacheManager\history.txt
-mkdir $(SolutionDir)..\release\ArchiveCacheManager\7-Zip
-copy /Y  $(SolutionDir)..\thirdparty\7-Zip\* $(SolutionDir)..\release\ArchiveCacheManager\7-Zip
-move /Y $(SolutionDir)..\release\ArchiveCacheManager\7-Zip\7z.exe $(SolutionDir)..\release\ArchiveCacheManager\7-Zip\7z.exe.original
-move /Y $(SolutionDir)..\release\ArchiveCacheManager\7-Zip\7z.dll $(SolutionDir)..\release\ArchiveCacheManager\7-Zip\7z.dll.original
-mkdir $(SolutionDir)..\release\ArchiveCacheManager\Badges
-copy /Y $(SolutionDir)Plugin\Resources\Badges $(SolutionDir)..\release\ArchiveCacheManager\Badges
-del $(SolutionDir)..\release\*.zip
-$(SolutionDir)..\thirdparty\7-Zip\7z.exe a $(SolutionDir)..\release\ArchiveCacheManager.zip $(SolutionDir)..\release\*</PostBuildEvent>
+    <AssemblyTitle>Archive Cache Manager</AssemblyTitle>
+    <Product>Archive Cache Manager</Product>
+    <Copyright>Copyright ©  2023</Copyright>
+    <AssemblyVersion>2.16.0.0</AssemblyVersion>
+    <FileVersion>2.16.0.0</FileVersion>
   </PropertyGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Target Name="AfterClean" AfterTargets="Clean">
+    <Exec Command="rmdir /s /q ..\..\release &gt;nul 2&gt;nul" />
+    <Exec Command="rmdir /s /q $(BaseIntermediateOutputPath) &gt;nul 2&gt;nul" />
+    <Exec Command="rmdir /s /q $(BaseOutputPath) &gt;nul 2&gt;nul" />
+  </Target>
+  <Target Name="AfterBuild" AfterTargets="Build">
+    <Exec Command="rmdir /s /q $(SolutionDir)\..\release &gt;nul 2&gt;nul" />
+    <Exec Command="mkdir $(SolutionDir)..\release\ArchiveCacheManager" />
+    <Exec Command="mkdir $(SolutionDir)..\release\ArchiveCacheManager\Extractors" />
+    <Exec Command='echo | set /p foo="Place the extractor applications in this folder, such as chdman.exe and DolphinTool.exe">"$(SolutionDir)..\release\ArchiveCacheManager\Extractors\Place exe files here.txt"' />
+    <Exec Command="copy /Y $(TargetDir)*.exe $(SolutionDir)..\release\ArchiveCacheManager" />
+    <Exec Command="copy /Y $(TargetDir)*.dll $(SolutionDir)..\release\ArchiveCacheManager" />
+    <Exec Command="copy /Y $(TargetDir)*.runtimeconfig.json $(SolutionDir)..\release\ArchiveCacheManager" />
+    <Exec Command="copy /Y  $(SolutionDir)..\README.md $(SolutionDir)..\release\ArchiveCacheManager\readme.txt" />
+    <Exec Command="copy /Y  $(SolutionDir)..\HISTORY.md $(SolutionDir)..\release\ArchiveCacheManager\history.txt" />
+    <Exec Command="mkdir $(SolutionDir)..\release\ArchiveCacheManager\7-Zip" />
+    <Exec Command="copy /Y  $(SolutionDir)..\thirdparty\7-Zip\* $(SolutionDir)..\release\ArchiveCacheManager\7-Zip" />
+    <Exec Command="move /Y $(SolutionDir)..\release\ArchiveCacheManager\7-Zip\7z.exe $(SolutionDir)..\release\ArchiveCacheManager\7-Zip\7z.exe.original" />
+    <Exec Command="move /Y $(SolutionDir)..\release\ArchiveCacheManager\7-Zip\7z.dll $(SolutionDir)..\release\ArchiveCacheManager\7-Zip\7z.dll.original" />
+    <Exec Command="mkdir $(SolutionDir)..\release\ArchiveCacheManager\Badges" />
+    <Exec Command="copy /Y $(SolutionDir)Plugin\Resources\Badges $(SolutionDir)..\release\ArchiveCacheManager\Badges" />
+    <Exec Command="del $(SolutionDir)..\release\*.zip" />
+    <Exec Command="$(SolutionDir)..\thirdparty\7-Zip\7z.exe a $(SolutionDir)..\release\ArchiveCacheManager.zip $(SolutionDir)..\release\*" />
+  </Target>
 </Project>

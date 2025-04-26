@@ -214,7 +214,7 @@ namespace ArchiveCacheManager
                         Logger.Log(string.Format("Temporarily set IGame.ApplicationPath for {0} ({1}) to {2}.", game.Title, game.Platform, game.ApplicationPath));
                     }
                 }
-                
+
                 #endregion
                 if (LaunchBoxDataBackup.Settings.Count > 0)
                 {
@@ -257,6 +257,8 @@ namespace ArchiveCacheManager
             paths.Add(Path.Combine(pluginRootPath, "ArchiveCacheManager.Core.dll"), Path.Combine(launchBox7zRootPath, "ArchiveCacheManager.Core.dll"));
             paths.Add(Path.Combine(pluginRootPath, "INIFileParser.dll"), Path.Combine(launchBox7zRootPath, "INIFileParser.dll"));
             paths.Add(Path.Combine(pluginRootPath, "ArchiveCacheManager.exe"), Path.Combine(launchBox7zRootPath, "7z.exe"));
+            paths.Add(Path.Combine(pluginRootPath, "ArchiveCacheManager.dll"), Path.Combine(launchBox7zRootPath, "ArchiveCacheManager.dll"));
+            paths.Add(Path.Combine(pluginRootPath, "ArchiveCacheManager.runtimeconfig.json"), Path.Combine(launchBox7zRootPath, "ArchiveCacheManager.runtimeconfig.json"));
             paths.Add(Path.Combine(plugin7zRootPath, "7z.exe.original"), Path.Combine(launchBox7zRootPath, "7-zip.exe"));
 
             foreach (var path in paths)
@@ -296,6 +298,8 @@ namespace ArchiveCacheManager
 
             string[] paths = new string[] { Path.Combine(launchBox7zRootPath, "ArchiveCacheManager.Core.dll"),
                                             Path.Combine(launchBox7zRootPath, "INIFileParser.dll"),
+                                            Path.Combine(launchBox7zRootPath, "ArchiveCacheManager.dll"),
+                                            Path.Combine(launchBox7zRootPath, "ArchiveCacheManager.runtimeconfig.json"),
                                             Path.Combine(launchBox7zRootPath, "7-zip.exe"),
                                             PathUtils.GetGameInfoPath() };
 

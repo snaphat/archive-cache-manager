@@ -37,6 +37,7 @@ namespace ArchiveCacheManager
 
         private static string assemblyPath;
         private static string assemblyFileName;
+        private static string expectedPluginAssemblyFileName;
         private static string assemblyDirectory;
         private static string launchBoxRootPath;
 
@@ -48,6 +49,7 @@ namespace ArchiveCacheManager
             assemblyPath = Assembly.GetEntryAssembly().Location;
             assemblyFileName = Path.GetFileName(assemblyPath);
             assemblyDirectory = Path.GetDirectoryName(assemblyPath);
+            expectedPluginAssemblyFileName = typeof(PathUtils).Namespace + ".dll";
             launchBoxRootPath = GetLaunchBoxRootPath();
         }
 
@@ -114,7 +116,7 @@ namespace ArchiveCacheManager
             string path;
 
             // Called from <LaunchBox>\ThirdParty\7-Zip\7z.exe
-            if (string.Equals(assemblyFileName, default7zFileName, StringComparison.InvariantCultureIgnoreCase))
+            if (string.Equals(assemblyFileName, expectedPluginAssemblyFileName, StringComparison.InvariantCultureIgnoreCase))
             {
                 // Call GetFullPath to resolve ..\.. in path
                 path = Path.GetFullPath(Path.Combine(assemblyDirectory, @"..\.."));
@@ -160,7 +162,7 @@ namespace ArchiveCacheManager
             string path;
 
             // Called from <LaunchBox>\ThirdParty\7-Zip\7z.exe
-            if (string.Equals(assemblyFileName, default7zFileName, StringComparison.InvariantCultureIgnoreCase))
+            if (string.Equals(assemblyFileName, expectedPluginAssemblyFileName, StringComparison.InvariantCultureIgnoreCase))
             {
                 path = Path.Combine(launchBoxRootPath, relative7zPath, alt7zFileName);
             }

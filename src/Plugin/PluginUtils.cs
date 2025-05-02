@@ -76,7 +76,7 @@ namespace ArchiveCacheManager
         {
             var additionalApps = game.GetAllAdditionalApplications();
 
-            return Array.Exists(additionalApps, a => a.Disc != null && a.ApplicationPath == game.ApplicationPath);
+            return Array.Exists(additionalApps, a => a.Disc != null && PathUtils.ComparePaths(a.ApplicationPath, game.ApplicationPath));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace ArchiveCacheManager
 
         /// <summary>
         /// Get info on a multi-disc game.
-        /// 
+        ///
         /// totalDiscs is the total number of discs in a game. Determined by counting additional apps with Disc property set. Will be 0 if not a multi-dsc game.
         /// selectedDisc is the selected disc, based on the additional app Disc property. Will be 1 if additional app is null, and 0 if not a multi-disc game.
         /// discs is a list of discs and associated info in disc order. Will be empty if not a multi-disc game.
@@ -142,7 +142,7 @@ namespace ArchiveCacheManager
             }
             else
             {
-                selectedDisc = (int)Array.Find(discApps, a => a.ApplicationPath == game.ApplicationPath).Disc;
+                selectedDisc = (int)Array.Find(discApps, a => PathUtils.ComparePaths(a.ApplicationPath, game.ApplicationPath)).Disc;
             }
 
             totalDiscs = discs.Count;

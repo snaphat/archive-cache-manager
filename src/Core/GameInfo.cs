@@ -23,11 +23,11 @@ namespace ArchiveCacheManager
         private bool mEmulatorPlatformM3u = false;
         private bool mMultiDisc = false;
         private int mTotalDiscs = 0;
-        private int mSelectedDisc = 0;
+        private string mSelectedDiscApp = string.Empty;
         private List<DiscInfo> mDiscs = new List<DiscInfo>();
 
         private static readonly string gameSection = "Game";
-        private static readonly string discSection = "Disc";
+        private static readonly string discSection = "DiscApp";
 
         /// <summary>
         /// True if GameInfo is loaded and valid, False otherwise.
@@ -96,10 +96,10 @@ namespace ArchiveCacheManager
             get => mTotalDiscs;
             set => mTotalDiscs = value;
         }
-        public int SelectedDisc
+        public string SelectedDiscApp
         {
-            get => mSelectedDisc;
-            set => mSelectedDisc = value;
+            get => mSelectedDiscApp;
+            set => mSelectedDiscApp = value;
         }
         public List<DiscInfo> Discs
         {
@@ -129,7 +129,7 @@ namespace ArchiveCacheManager
             mEmulatorPlatformM3u = game.mEmulatorPlatformM3u;
             mMultiDisc = game.mMultiDisc;
             mTotalDiscs = game.mTotalDiscs;
-            mSelectedDisc = game.mSelectedDisc;
+            mSelectedDiscApp = game.mSelectedDiscApp;
             mDiscs = new List<DiscInfo>(game.mDiscs);
         }
 
@@ -160,7 +160,7 @@ namespace ArchiveCacheManager
                     mEmulatorPlatformM3u = Convert.ToBoolean(iniData[gameSection][nameof(EmulatorPlatformM3u)]);
                     mMultiDisc = Convert.ToBoolean(iniData[gameSection][nameof(MultiDisc)]);
                     mTotalDiscs = Convert.ToInt32(iniData[gameSection][nameof(TotalDiscs)]);
-                    mSelectedDisc = Convert.ToInt32(iniData[gameSection][nameof(SelectedDisc)]);
+                    mSelectedDiscApp = iniData[gameSection][nameof(SelectedDiscApp)];
 
                     foreach (SectionData sectionData in iniData.Sections)
                     {
@@ -221,11 +221,12 @@ namespace ArchiveCacheManager
                 if (mMultiDisc)
                 {
                     iniData[gameSection][nameof(TotalDiscs)] = mTotalDiscs.ToString();
-                    iniData[gameSection][nameof(SelectedDisc)] = mSelectedDisc.ToString();
+                    iniData[gameSection][nameof(SelectedDiscApp)] = mSelectedDiscApp;
 
                     foreach (DiscInfo discInfo in mDiscs)
                     {
-                        string discNumberSection = string.Format("{0}{1}", discSection, discInfo.Disc);
+                        // Save as [DiscApp {ApplicationId}] to ensure that each section has a unique name
+                        string discNumberSection = string.Format("{0} {1}", discSection, discInfo.ApplicationId);
 
                         iniData[discNumberSection][nameof(DiscInfo.ApplicationId)] = discInfo.ApplicationId;
                         iniData[discNumberSection][nameof(DiscInfo.ArchivePath)] = discInfo.ArchivePath;

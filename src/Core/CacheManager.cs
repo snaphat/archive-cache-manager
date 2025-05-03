@@ -138,17 +138,19 @@ namespace ArchiveCacheManager
                 foreach (var discInfo in LaunchInfo.Game.Discs)
                 {
                     List<string> multiDiscPaths = new List<string>();
-                    foreach (var path in filePaths)
-                    {
-                        if (discInfo.ApplicationId == path.Key)
-                        {
-                            multiDiscPaths.Insert(0, path.Value);
-                        }
-                        else
-                        {
-                            multiDiscPaths.Add(path.Value);
-                        }
-                    }
+
+                    // Add current disc first (mimick LaunchBox's behavior)
+                    if (filePaths.TryGetValue(discInfo.ApplicationId, out var mainPath))
+                        multiDiscPaths.Add(mainPath);
+
+                    // Add all other disc paths, sorted by disc number then original list order (mimick LaunchBox's behavior)
+                    multiDiscPaths.AddRange(
+                        LaunchInfo.Game.Discs
+                            .Select((d, i) => new { d.ApplicationId, d.Disc, Index = i }) // attach index for tie-breaking
+                            .Where(x => x.ApplicationId != discInfo.ApplicationId && filePaths.ContainsKey(x.ApplicationId)) // exclude current disc
+                            .OrderBy(x => x.Disc).ThenBy(x => x.Index) // sort by disc number, then original order
+                            .Select(x => filePaths[x.ApplicationId]) // map to file path
+                    );
 
                     string m3uPath = LaunchInfo.GetM3uPath(LaunchInfo.GetArchiveCachePath(discInfo.ApplicationId), discInfo.ApplicationId);
                     try

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Linq;
 using System.Globalization;
+using System.Collections.Generic;
 
 namespace ArchiveCacheManager
 {
@@ -19,6 +20,26 @@ namespace ArchiveCacheManager
          * <LaunchBox>\ThirdParty\7-Zip\7z.exe
          */
         public static readonly int MAX_PATH = 255; // Should be 260, but RetroArch fails to load anything over 255 chars
+
+        /// <summary>
+        /// A case-insensitive set of reserved device names that are invalid as file names on Windows systems,
+        /// regardless of file extension. This includes standard reserved names such as "CON", "PRN", "AUX", and "NUL",
+        /// serial port identifiers like "COM1" through "COM9", printer port identifiers like "LPT1" through "LPT9",
+        /// and their superscript Unicode variants (e.g., "COM¹", "LPT³") which are treated equivalently by Windows.
+        /// </summary>
+        /// <remarks>
+        /// Windows disallows these names even when followed by extensions (e.g., "NUL.txt", "PRN.csv", "COM1.log").
+        /// See the following documentation for detailed information:
+        /// https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/FileIO/naming-a-file.md
+        /// </remarks>
+        private static readonly HashSet<string> ReservedFileNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "CON", "PRN", "AUX", "NUL",
+            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+            "COM¹", "COM²", "COM³",
+            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+            "LPT¹", "LPT²", "LPT³"
+        };
 
         private static readonly string configFileName = @"config.ini";
         private static readonly string gameIndexFileName = @"game-index.ini";
@@ -457,42 +478,37 @@ namespace ArchiveCacheManager
         }
 
         /// <summary>
-        /// Get a valid path from the input string. Will replace invalid characters with '_'.
-        /// If the path is reserved or otherwise generates an exception, safePath will be used.
+        /// Returns a sanitized file name from the input string. Replaces invalid characters with '_'.
+        /// If the result is empty, a reserved name, or otherwise invalid, the fallback name is returned.
         /// </summary>
-        /// <param name="pathToValidate">The path to validate.</param>
-        /// <param name="safePath">The fallback path to use if path validation fails.</param>
-        /// <returns>The validated filename.</returns>
-        public static string GetValidPath(string pathToValidate, string safePath)
+        /// <param name="fileName">The file name to sanitize (not a full path).</param>
+        /// <param name="fallbackFileName">Fallback name if the result is invalid or reserved.</param>
+        /// <returns>A sanitized, valid file name.</returns>
+        public static string GetValidFileName(string fileName, string fallbackFileName)
         {
-            var invalidChars = Path.GetInvalidPathChars();
-            var validPath = String.Join("_", pathToValidate.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
-            var reservedNames = new[]
-            {
-                "CON", "PRN", "AUX", "CLOCK$", "NUL", "COM0", "COM1", "COM2", "COM3", "COM4",
-                "COM5", "COM6", "COM7", "COM8", "COM9", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4",
-                "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-            };
+            if (string.IsNullOrWhiteSpace(fileName))
+                return fallbackFileName;
 
-            foreach (var reserved in reservedNames)
-            {
-                if (String.Equals(validPath, reserved, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    validPath = safePath;
-                    break;
-                }
-            }
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var cleaned = string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.', ' ');
+
+            if (string.IsNullOrWhiteSpace(cleaned))
+                return fallbackFileName;
+
+            var baseName = Path.GetFileNameWithoutExtension(cleaned);
+            if (ReservedFileNames.Contains(baseName))
+                return fallbackFileName;
 
             try
             {
-                DirectoryInfo directoryInfo = new DirectoryInfo(validPath);
+                Path.GetFullPath(Path.Combine("C:\\", cleaned));
             }
             catch
             {
-                validPath = safePath;
+                return fallbackFileName;
             }
 
-            return validPath;
+            return cleaned;
         }
 
         /// <summary>

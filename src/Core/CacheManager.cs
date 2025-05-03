@@ -139,11 +139,11 @@ namespace ArchiveCacheManager
                 {
                     List<string> multiDiscPaths = new List<string>();
 
-                    // Add current disc first (mimick LaunchBox's behavior)
+                    // Add current disc first (mimics LaunchBox behavior)
                     if (filePaths.TryGetValue(discInfo.ApplicationId, out var mainPath))
                         multiDiscPaths.Add(mainPath);
 
-                    // Add all other disc paths, sorted by disc number then original list order (mimick LaunchBox's behavior)
+                    // Add all other disc paths, sorted by disc number then original list order (mimics LaunchBox behavior)
                     multiDiscPaths.AddRange(
                         LaunchInfo.Game.Discs
                             .Select((d, i) => new { d.ApplicationId, d.Disc, Index = i }) // attach index for tie-breaking
@@ -153,15 +153,21 @@ namespace ArchiveCacheManager
                     );
 
                     string m3uPath = LaunchInfo.GetM3uPath(LaunchInfo.GetArchiveCachePath(discInfo.ApplicationId), discInfo.ApplicationId);
-                    try
+
+                    // Skip writing if the .m3u already exists — this can occur when multiple discs share the same
+                    // archive path, resulting in identical, non-unique files
+                    if (!File.Exists(m3uPath))
                     {
-                        File.WriteAllLines(m3uPath, multiDiscPaths);
-                        DiskUtils.SetFileReadOnly(m3uPath);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log(string.Format("Failed to save m3u file \"{0}\".", m3uPath), Logger.LogLevel.Exception);
-                        Logger.Log(e.ToString(), Logger.LogLevel.Exception);
+                        try
+                        {
+                            File.WriteAllLines(m3uPath, multiDiscPaths);
+                            DiskUtils.SetFileReadOnly(m3uPath);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Log(string.Format("Failed to save m3u file \"{0}\".", m3uPath), Logger.LogLevel.Exception);
+                            Logger.Log(e.ToString(), Logger.LogLevel.Exception);
+                        }
                     }
                 }
             }

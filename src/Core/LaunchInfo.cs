@@ -14,6 +14,7 @@ namespace ArchiveCacheManager
     {
         private class CacheData
         {
+            public int Disc;
             public string ArchivePath;
             public string ArchiveCachePath;
             public bool? ArchiveInCache;
@@ -37,7 +38,7 @@ namespace ArchiveCacheManager
 
         private static GameInfo mGame;
         private static CacheData mGameCacheData;
-        private static Dictionary<int, CacheData> mMultiDiscCacheData;
+        private static Dictionary<string, CacheData> mMultiDiscCacheData;
 
         /// <summary>
         /// The game info from LaunchBox.
@@ -60,14 +61,15 @@ namespace ArchiveCacheManager
                 Logger.Log(string.Format("Archive path set to \"{0}\".", mGameCacheData.ArchivePath));
                 Logger.Log(string.Format("Archive cache path set to \"{0}\".", mGameCacheData.ArchiveCachePath));
             }
-            mMultiDiscCacheData = new Dictionary<int, CacheData>();
+            mMultiDiscCacheData = new Dictionary<string, CacheData>();
             foreach (var disc in mGame.Discs)
             {
-                mMultiDiscCacheData[disc.Disc] = new CacheData();
-                mMultiDiscCacheData[disc.Disc].ArchivePath = disc.ArchivePath;
-                mMultiDiscCacheData[disc.Disc].ArchiveCachePath = PathUtils.ArchiveCachePath(disc.ArchivePath);
-                Logger.Log(string.Format("Disc {0} archive path set to \"{1}\".", disc.Disc, mMultiDiscCacheData[disc.Disc].ArchivePath));
-                Logger.Log(string.Format("Disc {0} archive cache path set to \"{1}\".", disc.Disc, mMultiDiscCacheData[disc.Disc].ArchiveCachePath));
+                mMultiDiscCacheData[disc.ApplicationId] = new CacheData();
+                mMultiDiscCacheData[disc.ApplicationId].Disc = disc.Disc;
+                mMultiDiscCacheData[disc.ApplicationId].ArchivePath = disc.ArchivePath;
+                mMultiDiscCacheData[disc.ApplicationId].ArchiveCachePath = PathUtils.ArchiveCachePath(disc.ArchivePath);
+                Logger.Log(string.Format("DiscApp {0} archive path set to \"{1}\".", disc.ApplicationId, mMultiDiscCacheData[disc.ApplicationId].ArchivePath));
+                Logger.Log(string.Format("DiscApp {0} archive cache path set to \"{1}\".", disc.ApplicationId, mMultiDiscCacheData[disc.ApplicationId].ArchiveCachePath));
             }
 
             Extractor = GetExtractor(mGameCacheData.ArchivePath);
@@ -112,29 +114,29 @@ namespace ArchiveCacheManager
         /// <summary>
         /// Get the size of the game archive when extracted. For multi-disc games, the size will be the total of all discs.
         /// </summary>
-        /// <param name="disc"></param>
+        /// <param name="discApp"></param>
         /// <returns></returns>
-        public static long GetSize(int? disc = null)
+        public static long GetSize(string discApp = null)
         {
-            if (disc != null)
+            if (discApp != null)
             {
                 try
                 {
-                    if (mMultiDiscCacheData[(int)disc].Size == null)
+                    if (mMultiDiscCacheData[discApp].Size == null)
                     {
-                        mMultiDiscCacheData[(int)disc].Size = Extractor.GetSize(mMultiDiscCacheData[(int)disc].ArchivePath);
-                        Logger.Log(string.Format("Disc {0} decompressed archive size is {1} bytes.", (int)disc, (long)mMultiDiscCacheData[(int)disc].Size));
+                        mMultiDiscCacheData[discApp].Size = Extractor.GetSize(mMultiDiscCacheData[discApp].ArchivePath);
+                        Logger.Log(string.Format("DiscApp {0} decompressed archive size is {1} bytes.", discApp, (long)mMultiDiscCacheData[discApp].Size));
                     }
 
-                    return (long)mMultiDiscCacheData[(int)disc].Size;
+                    return (long)mMultiDiscCacheData[discApp].Size;
                 }
                 catch (KeyNotFoundException)
                 {
-                    Logger.Log(string.Format("Unknown disc number {0}, using DecompressedSize instead.", (int)disc));
+                    Logger.Log(string.Format("Unknown DiscApp {0}, using DecompressedSize instead.", discApp));
                 }
             }
 
-            if (mGame.MultiDisc && MultiDiscSupport && disc == null)
+            if (mGame.MultiDisc && MultiDiscSupport && discApp == null)
             {
                 long multiDiscDecompressedSize = 0;
 
@@ -159,25 +161,25 @@ namespace ArchiveCacheManager
         /// <summary>
         /// Update the size of the cached game based on the cache path. Only call this after successful extraction.
         /// </summary>
-        /// <param name="disc"></param>
+        /// <param name="discApp"></param>
         /// <returns></returns>
-        public static void UpdateSizeFromCache(int? disc = null)
+        public static void UpdateSizeFromCache(string discApp = null)
         {
-            if (disc != null)
+            if (discApp != null)
             {
                 try
                 {
-                    mMultiDiscCacheData[(int)disc].Size = DiskUtils.DirectorySize(new DirectoryInfo(mMultiDiscCacheData[(int)disc].ArchiveCachePath));
-                    Logger.Log(string.Format("Disc {0} on disk size is {1} bytes.", (int)disc, (long)mMultiDiscCacheData[(int)disc].Size));
+                    mMultiDiscCacheData[discApp].Size = DiskUtils.DirectorySize(new DirectoryInfo(mMultiDiscCacheData[discApp].ArchiveCachePath));
+                    Logger.Log(string.Format("DiscApp {0} on disk size is {1} bytes.", discApp, (long)mMultiDiscCacheData[discApp].Size));
                     return;
                 }
                 catch (KeyNotFoundException)
                 {
-                    Logger.Log(string.Format("Unknown disc number {0}, using DecompressedSize instead.", (int)disc));
+                    Logger.Log(string.Format("Unknown DiscApp {0}, using DecompressedSize instead.", discApp));
                 }
             }
 
-            if (mGame.MultiDisc && MultiDiscSupport && disc == null)
+            if (mGame.MultiDisc && MultiDiscSupport && discApp == null)
             {
                 foreach (var discCacheData in mMultiDiscCacheData)
                 {
@@ -191,22 +193,22 @@ namespace ArchiveCacheManager
             Logger.Log(string.Format("On disk archive size is {0} bytes.", (long)mGameCacheData.Size));
         }
 
-        public static string[] GetFileList(int? disc = null)
+        public static string[] GetFileList(string discApp = null)
         {
-            if (disc != null)
+            if (discApp != null)
             {
                 try
                 {
-                    if (mMultiDiscCacheData[(int)disc].FileList == null)
+                    if (mMultiDiscCacheData[discApp].FileList == null)
                     {
-                        mMultiDiscCacheData[(int)disc].FileList = Extractor.List(mMultiDiscCacheData[(int)disc].ArchivePath);
+                        mMultiDiscCacheData[discApp].FileList = Extractor.List(mMultiDiscCacheData[discApp].ArchivePath);
                     }
 
-                    return mMultiDiscCacheData[(int)disc].FileList;
+                    return mMultiDiscCacheData[discApp].FileList;
                 }
                 catch (KeyNotFoundException)
                 {
-                    Logger.Log(string.Format("Unknown disc number {0}, using launched file list instead.", (int)disc));
+                    Logger.Log(string.Format("Unknown DiscApp {0}, using launched file list instead.", discApp));
                 }
             }
 
@@ -358,19 +360,19 @@ namespace ArchiveCacheManager
         /// <summary>
         /// Get the source archive path of the game. If disc is specified, the archive path will be to that disc.
         /// </summary>
-        /// <param name="disc"></param>
+        /// <param name="discApp"></param>
         /// <returns></returns>
-        public static string GetArchivePath(int? disc = null)
+        public static string GetArchivePath(string discApp = null)
         {
-            if (disc != null)
+            if (discApp != null)
             {
                 try
                 {
-                    return mMultiDiscCacheData[(int)disc].ArchivePath;
+                    return mMultiDiscCacheData[discApp].ArchivePath;
                 }
                 catch (KeyNotFoundException)
                 {
-                    Logger.Log(string.Format("Unknown disc number {0}, using ArchivePath instead.", (int)disc));
+                    Logger.Log(string.Format("Unknown DiscApp {0}, using ArchivePath instead.", discApp));
                 }
             }
 
@@ -380,26 +382,26 @@ namespace ArchiveCacheManager
         /// <summary>
         /// Get the cache path of the game. If disc is specified, the archive path will be to that disc.
         /// </summary>
-        /// <param name="disc"></param>
+        /// <param name="discApp"></param>
         /// <returns></returns>
-        public static string GetArchiveCachePath(int? disc = null)
+        public static string GetArchiveCachePath(string discApp = null)
         {
-            if (disc != null)
+            if (discApp != null)
             {
                 try
                 {
-                    return mMultiDiscCacheData[(int)disc].ArchiveCachePath;
+                    return mMultiDiscCacheData[discApp].ArchiveCachePath;
                 }
                 catch (KeyNotFoundException)
                 {
-                    Logger.Log(string.Format("Unknown disc number {0}, using ArchiveCachePath instead.", (int)disc));
+                    Logger.Log(string.Format("Unknown DiscApp {0}, using ArchiveCachePath instead.", discApp));
                 }
             }
 
             return mGameCacheData.ArchiveCachePath;
         }
 
-        private static string GetLaunchPath(int? disc = null)
+        private static string GetLaunchPath(string discApp = null)
         {
             string launchPath;
 
@@ -416,7 +418,7 @@ namespace ArchiveCacheManager
                     break;
                 case Config.LaunchPath.Default:
                 default:
-                    launchPath = GetArchiveCachePath(disc);
+                    launchPath = GetArchiveCachePath(discApp);
                     break;
             }
 
@@ -426,18 +428,18 @@ namespace ArchiveCacheManager
         /// <summary>
         /// Get the cache path of the game. If disc is specified, the archive path will be to that disc.
         /// </summary>
-        /// <param name="disc"></param>
+        /// <param name="discApp"></param>
         /// <returns></returns>
-        public static string GetArchiveCacheLaunchPath(int? disc = null)
+        public static string GetArchiveCacheLaunchPath(string discApp = null)
         {
-            if (disc != null)
+            if (discApp != null)
             {
-                if (mMultiDiscCacheData[(int)disc].ArchiveCacheLaunchPath == null)
+                if (mMultiDiscCacheData[discApp].ArchiveCacheLaunchPath == null)
                 {
-                    mMultiDiscCacheData[(int)disc].ArchiveCacheLaunchPath = GetLaunchPath(disc);
+                    mMultiDiscCacheData[discApp].ArchiveCacheLaunchPath = GetLaunchPath(discApp);
                 }
 
-                return mMultiDiscCacheData[(int)disc].ArchiveCacheLaunchPath;
+                return mMultiDiscCacheData[discApp].ArchiveCacheLaunchPath;
             }
 
             if (mGameCacheData.ArchiveCacheLaunchPath == null)
@@ -448,7 +450,7 @@ namespace ArchiveCacheManager
             return mGameCacheData.ArchiveCacheLaunchPath;
         }
 
-        private static string GetM3uName(string archiveCachePath, int? disc = null)
+        private static string GetM3uName(string archiveCachePath, string discApp = null)
         {
             string m3uName;
 
@@ -459,14 +461,14 @@ namespace ArchiveCacheManager
                     m3uName = PathUtils.GetArchiveCacheM3uGameIdPath(archiveCachePath, mGame.GameId);
                     break;
                 case Config.M3uName.TitleVersion:
-                    m3uName = PathUtils.GetArchiveCacheM3uGameTitlePath(archiveCachePath, mGame.GameId, mGame.Title, mGame.Version, disc);
+                    m3uName = PathUtils.GetArchiveCacheM3uGameTitlePath(archiveCachePath, mGame.GameId, mGame.Title, mGame.Version, mGame.Discs.Find(d => d.ApplicationId == discApp)?.Disc ?? 0);
                     break;
                 case Config.M3uName.DiscOneFilename:
                     string archivePath;
                     try
                     {
                         // Get the path of disc 1 (not index 1)
-                        archivePath = mMultiDiscCacheData[1].ArchivePath;
+                        archivePath = mMultiDiscCacheData.First(a => a.Value.Disc == 1).Value.ArchivePath;
                     }
                     catch (Exception e)
                     {
@@ -480,16 +482,16 @@ namespace ArchiveCacheManager
             return m3uName;
         }
 
-        public static string GetM3uPath(string archiveCachePath, int? disc = null)
+        public static string GetM3uPath(string archiveCachePath, string discApp = null)
         {
-            if (disc != null)
+            if (discApp != null)
             {
-                if (mMultiDiscCacheData[(int)disc].M3uName == null)
+                if (mMultiDiscCacheData[discApp].M3uName == null)
                 {
-                    mMultiDiscCacheData[(int)disc].M3uName = GetM3uName(archiveCachePath, disc);
+                    mMultiDiscCacheData[discApp].M3uName = GetM3uName(archiveCachePath, discApp);
                 }
 
-                return mMultiDiscCacheData[(int)disc].M3uName;
+                return mMultiDiscCacheData[discApp].M3uName;
             }
 
             if (mGameCacheData.M3uName == null)
@@ -522,28 +524,28 @@ namespace ArchiveCacheManager
         /// <summary>
         /// Check if the game is cached. Will check if all discs of a multi-disc game are cached.
         /// </summary>
-        /// <param name="disc">When specified, checks if a particular disc of a game is cached.</param>
+        /// <param name="discApp">When specified, checks if a particular disc of a game is cached.</param>
         /// <returns>True if the game is cached, and False otherwise.</returns>
-        public static bool GetArchiveInCache(int? disc = null)
+        public static bool GetArchiveInCache(string discApp = null)
         {
-            if (disc != null)
+            if (discApp != null)
             {
                 try
                 {
-                    if (mMultiDiscCacheData[(int)disc].ArchiveInCache == null)
+                    if (mMultiDiscCacheData[discApp].ArchiveInCache == null)
                     {
-                        mMultiDiscCacheData[(int)disc].ArchiveInCache = File.Exists(PathUtils.GetArchiveCacheGameInfoPath(mMultiDiscCacheData[(int)disc].ArchiveCachePath));
+                        mMultiDiscCacheData[discApp].ArchiveInCache = File.Exists(PathUtils.GetArchiveCacheGameInfoPath(mMultiDiscCacheData[discApp].ArchiveCachePath));
                     }
 
-                    return (bool)mMultiDiscCacheData[(int)disc].ArchiveInCache;
+                    return (bool)mMultiDiscCacheData[discApp].ArchiveInCache;
                 }
                 catch (KeyNotFoundException)
                 {
-                    Logger.Log(string.Format("Unknown disc number {0}, using ArchiveInCache instead.", (int)disc));
+                    Logger.Log(string.Format("Unknown DiscApp {0}, using ArchiveInCache instead.", discApp));
                 }
             }
 
-            if (mGame.MultiDisc && MultiDiscSupport && disc == null)
+            if (mGame.MultiDisc && MultiDiscSupport && discApp == null)
             {
                 // Set true if there are multiple discs, false otherwise. When false, subsequent boolean operations will be false.
                 bool multiDiscArchiveInCache = mMultiDiscCacheData.Count > 0;
@@ -590,19 +592,19 @@ namespace ArchiveCacheManager
             return GetArchiveInCache() ? 1 : 0;
         }
 
-        public static void SaveToCache(int? disc = null)
+        public static void SaveToCache(string discApp = null)
         {
-            if (mGame.MultiDisc && MultiDiscSupport && disc == null)
+            if (mGame.MultiDisc && MultiDiscSupport && discApp == null)
             {
                 foreach (var discInfo in mGame.Discs)
                 {
-                    SaveToCache(discInfo.Disc);
+                    SaveToCache(discInfo.ApplicationId);
                 }
 
                 return;
             }
 
-            string archiveCacheGameInfoPath = PathUtils.GetArchiveCacheGameInfoPath(GetArchiveCachePath(disc));
+            string archiveCacheGameInfoPath = PathUtils.GetArchiveCacheGameInfoPath(GetArchiveCachePath(discApp));
             GameInfo savedGameInfo = new GameInfo(mGame);
             GameInfo cachedGameInfo = new GameInfo(archiveCacheGameInfoPath);
 
@@ -612,13 +614,13 @@ namespace ArchiveCacheManager
             }
             else
             {
-                savedGameInfo.DecompressedSize = GetSize(disc);
+                savedGameInfo.DecompressedSize = GetSize(discApp);
             }
 
-            if (disc != null)
+            if (discApp != null)
             {
-                savedGameInfo.ArchivePath = mGame.Discs.Find(d => d.Disc == (int)disc).ArchivePath;
-                savedGameInfo.SelectedDisc = (int)disc;
+                savedGameInfo.ArchivePath = mGame.Discs.Find(d => d.ApplicationId == discApp).ArchivePath;
+                savedGameInfo.SelectedDiscApp = discApp;
             }
 
             savedGameInfo.Save(archiveCacheGameInfoPath);

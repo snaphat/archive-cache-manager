@@ -408,13 +408,13 @@ namespace ArchiveCacheManager
             switch (mGameCacheData.Config.LaunchPath)
             {
                 case Config.LaunchPath.Title:
-                    launchPath = Path.Combine(PathUtils.CachePath(), PathUtils.GetValidPath(mGame.Title, "Title"));
+                    launchPath = Path.Combine(PathUtils.CachePath(), PathUtils.GetValidFileName(mGame.Title, "Title"));
                     break;
                 case Config.LaunchPath.Platform:
-                    launchPath = Path.Combine(PathUtils.CachePath(), PathUtils.GetValidPath(mGame.Platform, "Platform"));
+                    launchPath = Path.Combine(PathUtils.CachePath(), PathUtils.GetValidFileName(mGame.Platform, "Platform"));
                     break;
                 case Config.LaunchPath.Emulator:
-                    launchPath = Path.Combine(PathUtils.CachePath(), PathUtils.GetValidPath(mGame.Emulator, "Emulator"));
+                    launchPath = Path.Combine(PathUtils.CachePath(), PathUtils.GetValidFileName(mGame.Emulator, "Emulator"));
                     break;
                 case Config.LaunchPath.Default:
                 default:

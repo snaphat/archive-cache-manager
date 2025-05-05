@@ -197,12 +197,26 @@ namespace ArchiveCacheManager
                     }
                     else
                     {
-                        GameInfo gameInfo = new GameInfo(Path.Combine(dir, PathUtils.GetGameInfoFileName()));
+                        GameInfo gameInfo = new GameInfo(gameInfoPath);
                         if (!gameInfo.InfoLoaded)
                         {
+                            try
+                            {
+                                var linkSource = File.ReadAllText(Path.Combine(dir, PathUtils.GetLinkFlagFileName()));
+                                if (!string.IsNullOrEmpty(linkSource))
+                                {
+                                    gameInfo = new GameInfo(Path.Combine(linkSource, PathUtils.GetGameInfoFileName()));
+                                    if (gameInfo.InfoLoaded)
+                                        continue; // don't setup decompress size for link directories
+                                }
+                            }
+                            catch
+                            {
+                            }
+
                             Logger.Log(string.Format("Error loading game.ini, deleting cached item \"{0}\".", dir));
                             DiskUtils.DeleteDirectory(dir, false, true);
-                            continue;
+                            continue; // don't setup decompress size for deleted directories
                         }
 
                         if (gameInfo.DecompressedSize == 0)

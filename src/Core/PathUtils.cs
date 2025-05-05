@@ -454,27 +454,22 @@ namespace ArchiveCacheManager
         /// <returns>The validated filename.</returns>
         public static string GetValidFilename(string filenameToValidate, string safeFilename)
         {
+            if (string.IsNullOrWhiteSpace(filenameToValidate))
+                return safeFilename;
+
             var invalidChars = Path.GetInvalidFileNameChars();
             var validFilename = String.Join("_", filenameToValidate.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
-            var reservedNames = new[]
-            {
-                "CON", "PRN", "AUX", "CLOCK$", "NUL", "COM0", "COM1", "COM2", "COM3", "COM4",
-                "COM5", "COM6", "COM7", "COM8", "COM9", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4",
-                "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-            };
 
-            foreach (var reserved in reservedNames)
-            {
-                if (String.Equals(validFilename, reserved, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    validFilename = safeFilename;
-                    break;
-                }
-            }
+            if (string.IsNullOrWhiteSpace(validFilename))
+                return safeFilename;
+
+            var baseName = Path.GetFileNameWithoutExtension(validFilename);
+            if (ReservedFileNames.Contains(baseName))
+                return safeFilename;
 
             try
             {
-                FileInfo fileInfo = new FileInfo(validFilename);
+                Path.GetFullPath(Path.Combine("C:\\", validFilename));
             }
             catch
             {
@@ -482,40 +477,6 @@ namespace ArchiveCacheManager
             }
 
             return validFilename;
-        }
-
-        /// <summary>
-        /// Returns a sanitized file name from the input string. Replaces invalid characters with '_'.
-        /// If the result is empty, a reserved name, or otherwise invalid, the fallback name is returned.
-        /// </summary>
-        /// <param name="fileName">The file name to sanitize (not a full path).</param>
-        /// <param name="fallbackFileName">Fallback name if the result is invalid or reserved.</param>
-        /// <returns>A sanitized, valid file name.</returns>
-        public static string GetValidFileName(string fileName, string fallbackFileName)
-        {
-            if (string.IsNullOrWhiteSpace(fileName))
-                return fallbackFileName;
-
-            var invalidChars = Path.GetInvalidFileNameChars();
-            var cleaned = string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.', ' ');
-
-            if (string.IsNullOrWhiteSpace(cleaned))
-                return fallbackFileName;
-
-            var baseName = Path.GetFileNameWithoutExtension(cleaned);
-            if (ReservedFileNames.Contains(baseName))
-                return fallbackFileName;
-
-            try
-            {
-                Path.GetFullPath(Path.Combine("C:\\", cleaned));
-            }
-            catch
-            {
-                return fallbackFileName;
-            }
-
-            return cleaned;
         }
 
         /// <summary>

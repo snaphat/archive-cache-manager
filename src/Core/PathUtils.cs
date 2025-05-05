@@ -44,6 +44,7 @@ namespace ArchiveCacheManager
         private static readonly string configFileName = @"config.ini";
         private static readonly string gameIndexFileName = @"game-index.ini";
         private static readonly string gameInfoFileName = @"game.ini";
+        private static readonly string linkFlagFileName = @"link";
         private static readonly string default7zFileName = @"7z.exe";
         private static readonly string alt7zFileName = @"7-zip.exe";
         private static readonly string tempPath = @"Temp";
@@ -270,7 +271,7 @@ namespace ArchiveCacheManager
         /// </summary>
         /// <param name="archiveLaunchPath">Location of the launch path in the cache.</param>
         /// <returns>Absolute path to the link flag file.</returns>
-        public static string GetArchiveCacheLinkFlagPath(string archiveLaunchPath) => Path.Combine(archiveLaunchPath, "link");
+        public static string GetArchiveCacheLinkFlagPath(string archiveLaunchPath) => Path.Combine(archiveLaunchPath, linkFlagFileName);
 
         /// <summary>
         /// Absolute path to the m3u file for the given archive cache path. Filename includes the game ID.
@@ -330,6 +331,12 @@ namespace ArchiveCacheManager
         /// </summary>
         /// <returns></returns>
         public static string GetGameInfoFileName() => gameInfoFileName;
+
+        /// <summary>
+        /// Link flag filename.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLinkFlagFileName() => linkFlagFileName;
 
         /// <summary>
         /// Calculates an MD5 hash of the given path.

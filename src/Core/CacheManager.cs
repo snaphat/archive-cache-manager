@@ -202,10 +202,10 @@ namespace ArchiveCacheManager
                         {
                             try
                             {
-                                var linkSource = File.ReadAllText(Path.Combine(dir, PathUtils.GetLinkFlagFileName()));
-                                if (!string.IsNullOrEmpty(linkSource))
+                                var archiveCachePath = File.ReadAllText(Path.Combine(dir, PathUtils.GetLinkFlagFileName()));
+                                if (!string.IsNullOrEmpty(archiveCachePath))
                                 {
-                                    gameInfo = new GameInfo(Path.Combine(linkSource, PathUtils.GetGameInfoFileName()));
+                                    gameInfo = new GameInfo(Path.Combine(archiveCachePath, PathUtils.GetGameInfoFileName()));
                                     if (gameInfo.InfoLoaded)
                                         continue; // don't setup decompress size for link directories
                                 }

@@ -197,12 +197,26 @@ namespace ArchiveCacheManager
                     }
                     else
                     {
-                        GameInfo gameInfo = new GameInfo(Path.Combine(dir, PathUtils.GetGameInfoFileName()));
+                        GameInfo gameInfo = new GameInfo(gameInfoPath);
                         if (!gameInfo.InfoLoaded)
                         {
+                            try
+                            {
+                                var archiveCachePath = File.ReadAllText(Path.Combine(dir, PathUtils.GetLinkFlagFileName()));
+                                if (!string.IsNullOrEmpty(archiveCachePath))
+                                {
+                                    gameInfo = new GameInfo(Path.Combine(archiveCachePath, PathUtils.GetGameInfoFileName()));
+                                    if (gameInfo.InfoLoaded)
+                                        continue; // don't setup decompress size for link directories
+                                }
+                            }
+                            catch
+                            {
+                            }
+
                             Logger.Log(string.Format("Error loading game.ini, deleting cached item \"{0}\".", dir));
                             DiskUtils.DeleteDirectory(dir, false, true);
-                            continue;
+                            continue; // don't setup decompress size for deleted directories
                         }
 
                         if (gameInfo.DecompressedSize == 0)
@@ -423,7 +437,7 @@ namespace ArchiveCacheManager
                         if (!gameInfo.KeepInCache || deleteKeep)
                         {
                             Logger.Log(string.Format("Deleting cached item \"{0}\".", dirs[i]));
-                            DiskUtils.DeleteDirectory(dirs[i]);
+                            DiskUtils.DeleteDirectory(dirs[i], false, true);
                             deletedSize += gameInfo.DecompressedSize;
 
                             if (deletedSize > sizeToDelete)

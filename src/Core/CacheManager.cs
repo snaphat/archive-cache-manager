@@ -437,7 +437,7 @@ namespace ArchiveCacheManager
                         if (!gameInfo.KeepInCache || deleteKeep)
                         {
                             Logger.Log(string.Format("Deleting cached item \"{0}\".", dirs[i]));
-                            DiskUtils.DeleteDirectory(dirs[i], false, true);
+                            DiskUtils.DeleteDirectory(dirs[i]);
                             deletedSize += gameInfo.DecompressedSize;
 
                             if (deletedSize > sizeToDelete)

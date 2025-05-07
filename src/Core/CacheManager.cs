@@ -200,18 +200,12 @@ namespace ArchiveCacheManager
                         GameInfo gameInfo = new GameInfo(gameInfoPath);
                         if (!gameInfo.InfoLoaded)
                         {
-                            try
+                            var linkSource = PathUtils.ReadLinkSourceFromArchiveCache(dir);
+                            if (!string.IsNullOrEmpty(linkSource))
                             {
-                                var archiveCachePath = File.ReadAllText(Path.Combine(dir, PathUtils.GetLinkFlagFileName()));
-                                if (!string.IsNullOrEmpty(archiveCachePath))
-                                {
-                                    gameInfo = new GameInfo(Path.Combine(archiveCachePath, PathUtils.GetGameInfoFileName()));
-                                    if (gameInfo.InfoLoaded)
-                                        continue; // don't setup decompress size for link directories
-                                }
-                            }
-                            catch
-                            {
+                                gameInfo = new GameInfo(Path.Combine(linkSource, PathUtils.GetGameInfoFileName()));
+                                if (gameInfo.InfoLoaded)
+                                    continue; // don't setup decompress size for link directories
                             }
 
                             Logger.Log(string.Format("Error loading game.ini, deleting cached item \"{0}\".", dir));
@@ -437,7 +431,15 @@ namespace ArchiveCacheManager
                         if (!gameInfo.KeepInCache || deleteKeep)
                         {
                             Logger.Log(string.Format("Deleting cached item \"{0}\".", dirs[i]));
-                            DiskUtils.DeleteDirectory(dirs[i], false, true);
+
+                            var linkSource = PathUtils.ReadLinkSourceFromArchiveCache(dirs[i]);
+                            if (!string.IsNullOrEmpty(linkSource))
+                            {
+                                DiskUtils.DeleteDirectory(linkSource);
+                            }
+
+                            DiskUtils.DeleteDirectory(dirs[i]);
+
                             deletedSize += gameInfo.DecompressedSize;
 
                             if (deletedSize > sizeToDelete)

@@ -22,41 +22,30 @@ namespace ArchiveCacheManager
             {
                 if (Directory.Exists(path))
                 {
-                    string linkSource = string.Empty;
-                    try
-                    {
-                        linkSource = File.ReadAllText(PathUtils.GetArchiveCacheLinkFlagPath(path));
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    string linkSource = PathUtils.ReadLinkSourceFromArchiveCache(path);
 
-                    static void DeleteDirectoryTree(string path, bool contentsOnly)
+                    // Enumerate and delete all files in all subdirectories
+                    foreach (string filePath in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
                     {
-                        // Enumerate and delete all files in all subdirectories
-                        foreach (string filePath in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
-                        {
-                            // Clear any read-only or other special file attributes.
-                            File.SetAttributes(filePath, FileAttributes.Normal);
-                            File.Delete(filePath);
-                        }
-                        // Enumerate and delete all subdirectories
-                        foreach (string dirPath in Directory.EnumerateDirectories(path))
-                        {
-                            Directory.Delete(dirPath, true);
-                        }
-
-                        if (!contentsOnly)
-                        {
-                            Directory.Delete(path, true);
-                        }
+                        // Clear any read-only or other special file attributes.
+                        File.SetAttributes(filePath, FileAttributes.Normal);
+                        File.Delete(filePath);
+                    }
+                    // Enumerate and delete all subdirectories
+                    foreach (string dirPath in Directory.EnumerateDirectories(path))
+                    {
+                        Directory.Delete(dirPath, true);
                     }
 
-                    DeleteDirectoryTree(path, contentsOnly);
+                    if (!contentsOnly)
+                    {
+                        Directory.Delete(path, true);
+                    }
 
                     if (!string.IsNullOrEmpty(linkSource) && unlink)
                     {
-                        DeleteDirectoryTree(linkSource, contentsOnly);
+                        SetDirectoryContentsReadOnly(linkSource);
+                        File.Delete(PathUtils.GetArchiveCacheLinkFlagPath(linkSource));
                     }
                 }
             }

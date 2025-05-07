@@ -267,11 +267,32 @@ namespace ArchiveCacheManager
         public static string GetArchiveCacheExtractingFlagPath(string archiveCachePath) => Path.Combine(archiveCachePath, "extracting");
 
         /// <summary>
-        /// Absolute path to the link flag file for the given archive cache path.
+        /// Absolute path to the link flag file for the given archive launch or cache path.
         /// </summary>
-        /// <param name="archiveLaunchPath">Location of the launch path in the cache.</param>
+        /// <param name="archiveLaunchOrCachePath">Location of the archive launch or cache path in the cache.</param>
         /// <returns>Absolute path to the link flag file.</returns>
-        public static string GetArchiveCacheLinkFlagPath(string archiveLaunchPath) => Path.Combine(archiveLaunchPath, linkFlagFileName);
+        public static string GetArchiveCacheLinkFlagPath(string archiveLaunchOrCachePath) => Path.Combine(archiveLaunchOrCachePath, linkFlagFileName);
+
+        /// <summary>
+        /// Reads the contents of the link flag file located in the specified archive launch or cache path.
+        /// </summary>
+        /// <param name="archiveLaunchOrCachePath">Location of the archive launch or cache path in the cache.</param>
+        /// <returns>
+        /// The string contents of the link flag file, or an empty string if the file could not be read.
+        /// </returns>
+        public static string ReadLinkSourceFromArchiveCache(string archiveLaunchOrCachePath)
+        {
+            string linkSource = String.Empty;
+            try
+            {
+                linkSource = File.ReadAllText(GetArchiveCacheLinkFlagPath(archiveLaunchOrCachePath));
+            }
+            catch (Exception)
+            {
+            }
+
+            return linkSource;
+        }
 
         /// <summary>
         /// Absolute path to the m3u file for the given archive cache path. Filename includes the game ID.

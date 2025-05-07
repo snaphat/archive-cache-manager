@@ -353,8 +353,14 @@ namespace ArchiveCacheManager
         {
             foreach (DataGridViewRow row in cacheDataGridView.SelectedRows)
             {
-                Logger.Log(string.Format("Manually deleting cached item \"{0}\".", row.Cells["ArchivePath"].Value));
-                DiskUtils.DeleteDirectory(row.Cells["ArchivePath"].Value.ToString());
+                var dir = row.Cells["ArchivePath"].Value.ToString();
+                Logger.Log(string.Format("Manually deleting cached item \"{0}\".", dir));
+
+                string linkSource = PathUtils.ReadLinkSourceFromArchiveCache(dir);
+                if (!string.IsNullOrEmpty(linkSource))
+                    DiskUtils.DeleteDirectory(linkSource);
+
+                DiskUtils.DeleteDirectory(dir);
                 cacheDataGridView.Rows.Remove(row);
             }
 

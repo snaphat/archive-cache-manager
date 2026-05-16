@@ -54,6 +54,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace ArchiveCacheManager
@@ -118,10 +119,21 @@ namespace ArchiveCacheManager
         {
             // Remove leading -o
             string outputPath = args[2].Remove(0, 2);
+            string launchBox7zTempPath = Path.GetFullPath(PathUtils.GetLaunchBox7zTempPath()).TrimEnd(
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar
+            );
+            string fullOutputPath = Path.GetFullPath(outputPath).TrimEnd(
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar
+            );
 
-            // Check if the destination path ends in 7-Zip\Temp, which is assumed to be for a game
-            // Any other path is likely to be either Metadata, or some other non-game archive
-            if (outputPath.EndsWith(@"7-Zip\Temp", StringComparison.InvariantCultureIgnoreCase))
+            // Check if the destination path is 7-Zip\Temp, or a child path within it, which is
+            // assumed to be for a game. Any other path is likely to be either Metadata, or some
+            // other non-game archive.
+            if (string.Equals(fullOutputPath, launchBox7zTempPath, StringComparison.InvariantCultureIgnoreCase) ||
+                fullOutputPath.StartsWith(launchBox7zTempPath + Path.DirectorySeparatorChar, StringComparison.InvariantCultureIgnoreCase) ||
+                fullOutputPath.StartsWith(launchBox7zTempPath + Path.AltDirectorySeparatorChar, StringComparison.InvariantCultureIgnoreCase))
             {
                 CacheManager.ExtractArchive(args);
             }

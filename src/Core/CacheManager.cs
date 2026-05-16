@@ -200,7 +200,7 @@ namespace ArchiveCacheManager
                         GameInfo gameInfo = new GameInfo(gameInfoPath);
                         if (!gameInfo.InfoLoaded)
                         {
-                            var linkSource = PathUtils.ReadLinkSourceFromArchiveCache(dir);
+                            var linkSource = PathUtils.ReadValidatedLinkSourceFromArchiveCache(dir);
                             if (!string.IsNullOrEmpty(linkSource))
                             {
                                 gameInfo = new GameInfo(Path.Combine(linkSource, PathUtils.GetGameInfoFileName()));
@@ -432,7 +432,7 @@ namespace ArchiveCacheManager
                         {
                             Logger.Log(string.Format("Deleting cached item \"{0}\".", dirs[i]));
 
-                            var linkSource = PathUtils.ReadLinkSourceFromArchiveCache(dirs[i]);
+                            var linkSource = PathUtils.ReadValidatedLinkSourceFromArchiveCache(dirs[i]);
                             if (!string.IsNullOrEmpty(linkSource))
                             {
                                 DiskUtils.DeleteDirectory(linkSource);

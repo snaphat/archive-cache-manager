@@ -274,13 +274,15 @@ namespace ArchiveCacheManager
         public static string GetArchiveCacheLinkFlagPath(string archiveLaunchOrCachePath) => Path.Combine(archiveLaunchOrCachePath, linkFlagFileName);
 
         /// <summary>
-        /// Reads the contents of the link flag file located in the specified archive launch or cache path.
+        /// Reads the raw contents of the link flag file located in the specified archive launch or cache path.
+        /// This method does not validate the returned path.
         /// </summary>
         /// <param name="archiveLaunchOrCachePath">Location of the archive launch or cache path in the cache.</param>
         /// <returns>
-        /// The string contents of the link flag file, or an empty string if the file could not be read.
+        /// The raw string contents of the link flag file, or an empty string if the file could not be read.
+        /// Use <see cref="ReadValidatedLinkSourceFromArchiveCache(string)"/> before acting on the returned path.
         /// </returns>
-        public static string ReadLinkSourceFromArchiveCache(string archiveLaunchOrCachePath)
+        private static string ReadLinkSourceFromArchiveCache(string archiveLaunchOrCachePath)
         {
             string linkSource = String.Empty;
             try
@@ -292,6 +294,47 @@ namespace ArchiveCacheManager
             }
 
             return linkSource;
+        }
+
+        /// <summary>
+        /// Reads and validates the linked archive cache path for the supplied launch or cache path.
+        /// </summary>
+        /// <param name="archiveLaunchOrCachePath">Location of the archive launch or cache path in the cache.</param>
+        /// <returns>
+        /// The validated linked path, or an empty string if the link is missing or invalid.
+        /// Validation requires both paths to stay inside the configured cache root and the linked path's flag file
+        /// to point back to <paramref name="archiveLaunchOrCachePath"/>.
+        /// </returns>
+        public static string ReadValidatedLinkSourceFromArchiveCache(string archiveLaunchOrCachePath)
+        {
+            try
+            {
+                string currentPath = Path.GetFullPath(archiveLaunchOrCachePath);
+                string linkSource = ReadLinkSourceFromArchiveCache(currentPath);
+                if (string.IsNullOrWhiteSpace(linkSource))
+                {
+                    return string.Empty;
+                }
+
+                string cacheRoot = Path.GetFullPath(CachePath());
+                string linkedPath = Path.GetFullPath(linkSource);
+                if (!IsPathInDirectory(currentPath, cacheRoot) || !IsPathInDirectory(linkedPath, cacheRoot))
+                {
+                    return string.Empty;
+                }
+
+                string reciprocalLinkSource = ReadLinkSourceFromArchiveCache(linkedPath);
+                if (!ComparePaths(reciprocalLinkSource, currentPath))
+                {
+                    return string.Empty;
+                }
+
+                return linkedPath;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
         }
 
         /// <summary>
@@ -358,6 +401,21 @@ namespace ArchiveCacheManager
         /// </summary>
         /// <returns></returns>
         public static string GetLinkFlagFileName() => linkFlagFileName;
+
+        /// <summary>
+        /// Checks whether <paramref name="path"/> resolves to a location inside <paramref name="directoryPath"/>.
+        /// Both paths are normalized to full paths, trailing separators are normalized, and comparison is case-insensitive.
+        /// </summary>
+        /// <param name="path">The candidate path to test.</param>
+        /// <param name="directoryPath">The parent directory boundary.</param>
+        /// <returns>True if <paramref name="path"/> is inside <paramref name="directoryPath"/>, otherwise false.</returns>
+        private static bool IsPathInDirectory(string path, string directoryPath)
+        {
+            string normalizedPath = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            string normalizedDirectory = Path.GetFullPath(directoryPath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+            return normalizedPath.StartsWith(normalizedDirectory, StringComparison.InvariantCultureIgnoreCase);
+        }
 
         /// <summary>
         /// Calculates an MD5 hash of the given path.

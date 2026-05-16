@@ -22,7 +22,7 @@ namespace ArchiveCacheManager
             {
                 if (Directory.Exists(path))
                 {
-                    string linkSource = PathUtils.ReadLinkSourceFromArchiveCache(path);
+                    string linkSource = PathUtils.ReadValidatedLinkSourceFromArchiveCache(path);
 
                     // Enumerate and delete all files in all subdirectories
                     foreach (string filePath in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))

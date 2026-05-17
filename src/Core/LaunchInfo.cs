@@ -46,6 +46,7 @@ namespace ArchiveCacheManager
         public static GameInfo Game => mGame;
         public static Extractor Extractor = null;
         public static Config.LaunchPath LaunchPathConfig => mGameCacheData.Config.LaunchPath;
+        public static bool ExtractReadWriteConfig => mGameCacheData.Config.ExtractReadWrite;
         public static bool MultiDiscSupport => mGameCacheData.Config.MultiDisc;
         public static bool BatchCache = false;
 

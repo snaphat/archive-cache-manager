@@ -53,6 +53,7 @@ namespace ArchiveCacheManager
         private static readonly LaunchPath defaultLaunchPath = LaunchPath.Default;
         private static readonly Action defaultAction = Action.Extract;
         private static readonly M3uName defaultM3uName = M3uName.GameId;
+        private static readonly bool defaultExtractReadWrite = false;
         private static readonly bool defaultChdman = false;
         private static readonly bool defaultDolphinTool = false;
         private static readonly bool defaultExtractXiso = false;
@@ -65,6 +66,7 @@ namespace ArchiveCacheManager
             public bool MultiDisc;
             public M3uName M3uName;
             public bool SmartExtract;
+            public bool ExtractReadWrite;
             public bool Chdman;
             public bool DolphinTool;
             public bool ExtractXiso;
@@ -77,6 +79,7 @@ namespace ArchiveCacheManager
                 MultiDisc = defaultMultiDisc;
                 M3uName = defaultM3uName;
                 SmartExtract = defaultSmartExtract;
+                ExtractReadWrite = defaultExtractReadWrite;
                 Chdman = defaultChdman;
                 DolphinTool = defaultDolphinTool;
                 ExtractXiso = defaultExtractXiso;
@@ -291,6 +294,23 @@ namespace ArchiveCacheManager
             return defaultSmartExtract;
         }
 
+        public static bool GetExtractReadWrite(string key)
+        {
+            try
+            {
+                return mEmulatorPlatformConfig[key].ExtractReadWrite;
+            }
+            catch (KeyNotFoundException) { }
+
+            try
+            {
+                return mEmulatorPlatformConfig[defaultEmulatorPlatform].ExtractReadWrite;
+            }
+            catch (KeyNotFoundException) { }
+
+            return defaultExtractReadWrite;
+        }
+
         public static bool GetChdman(string key)
         {
             try
@@ -490,6 +510,11 @@ namespace ArchiveCacheManager
                                 mEmulatorPlatformConfig[section.SectionName].SmartExtract = Convert.ToBoolean(section.Keys[nameof(EmulatorPlatformConfig.SmartExtract)]);
                             }
 
+                            if (section.Keys.ContainsKey(nameof(EmulatorPlatformConfig.ExtractReadWrite)))
+                            {
+                                mEmulatorPlatformConfig[section.SectionName].ExtractReadWrite = Convert.ToBoolean(section.Keys[nameof(EmulatorPlatformConfig.ExtractReadWrite)]);
+                            }
+
                             if (section.Keys.ContainsKey(nameof(EmulatorPlatformConfig.Chdman)))
                             {
                                 mEmulatorPlatformConfig[section.SectionName].Chdman = Convert.ToBoolean(section.Keys[nameof(EmulatorPlatformConfig.Chdman)]);
@@ -591,6 +616,7 @@ namespace ArchiveCacheManager
                 iniData[priority.Key][nameof(EmulatorPlatformConfig.MultiDisc)] = priority.Value.MultiDisc.ToString();
                 iniData[priority.Key][nameof(EmulatorPlatformConfig.M3uName)] = priority.Value.M3uName.ToString();
                 iniData[priority.Key][nameof(EmulatorPlatformConfig.SmartExtract)] = priority.Value.SmartExtract.ToString();
+                iniData[priority.Key][nameof(EmulatorPlatformConfig.ExtractReadWrite)] = priority.Value.ExtractReadWrite.ToString();
                 iniData[priority.Key][nameof(EmulatorPlatformConfig.Chdman)] = priority.Value.Chdman.ToString();
                 iniData[priority.Key][nameof(EmulatorPlatformConfig.DolphinTool)] = priority.Value.DolphinTool.ToString();
                 iniData[priority.Key][nameof(EmulatorPlatformConfig.ExtractXiso)] = priority.Value.ExtractXiso.ToString();

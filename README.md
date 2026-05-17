@@ -227,6 +227,13 @@ Check this option to enable smart extraction, which will only extract a single f
 
 Default: _`Enabled`_
 
+#### Read / Write
+Check this option to leave extracted files writable instead of marking them read-only after extraction.
+
+This only affects newly extracted or re-extracted cache entries. Existing cached files keep their current file attributes until the cache entry is deleted and rebuilt.
+
+Default: _`Disabled`_
+
 #### chdman
 Check this option to extract a _chd_ file to _cue+bin_ files using chdman. The executable _chdman.exe_ must be copied to the folder `LaunchBox\Plugins\ArchiveCacheManager\Extractors`.
 

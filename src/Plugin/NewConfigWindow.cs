@@ -76,6 +76,7 @@ namespace ArchiveCacheManager
                                                                                 config.Value.MultiDisc,
                                                                                 m3uNameItems[(int)config.Value.M3uName],
                                                                                 config.Value.SmartExtract,
+                                                                                config.Value.ExtractReadWrite,
                                                                                 config.Value.Chdman,
                                                                                 config.Value.DolphinTool,
                                                                                 config.Value.ExtractXiso });
@@ -90,6 +91,7 @@ namespace ArchiveCacheManager
                                                                           config.Value.MultiDisc,
                                                                           m3uNameItems[(int)config.Value.M3uName],
                                                                           config.Value.SmartExtract,
+                                                                          config.Value.ExtractReadWrite,
                                                                           config.Value.Chdman,
                                                                           config.Value.DolphinTool,
                                                                           config.Value.ExtractXiso });
@@ -227,9 +229,10 @@ namespace ArchiveCacheManager
                 config[key].MultiDisc = Convert.ToBoolean(row.Cells[5].Value);
                 config[key].M3uName = (Config.M3uName)m3uNameItems.IndexOf(row.Cells[6].Value);
                 config[key].SmartExtract = Convert.ToBoolean(row.Cells[7].Value);
-                config[key].Chdman = Convert.ToBoolean(row.Cells[8].Value);
-                config[key].DolphinTool = Convert.ToBoolean(row.Cells[9].Value);
-                config[key].ExtractXiso = Convert.ToBoolean(row.Cells[10].Value);
+                config[key].ExtractReadWrite = Convert.ToBoolean(row.Cells[8].Value);
+                config[key].Chdman = Convert.ToBoolean(row.Cells[9].Value);
+                config[key].DolphinTool = Convert.ToBoolean(row.Cells[10].Value);
+                config[key].ExtractXiso = Convert.ToBoolean(row.Cells[11].Value);
             }
 
             Config.UpdateCheck = updateCheckCheckBox.Checked;
@@ -287,7 +290,9 @@ namespace ArchiveCacheManager
                                                                                        emulatorPlatformConfigDataGridView[6, 0].Value,
                                                                                        emulatorPlatformConfigDataGridView[7, 0].Value,
                                                                                        emulatorPlatformConfigDataGridView[8, 0].Value,
-                                                                                       emulatorPlatformConfigDataGridView[9, 0].Value });
+                                                                                       emulatorPlatformConfigDataGridView[9, 0].Value,
+                                                                                       emulatorPlatformConfigDataGridView[10, 0].Value,
+                                                                                       emulatorPlatformConfigDataGridView[11, 0].Value });
                 emulatorPlatformConfigDataGridView.Rows[index].Selected = true;
             }
         }

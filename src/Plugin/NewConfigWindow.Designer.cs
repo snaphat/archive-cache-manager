@@ -92,6 +92,7 @@ namespace ArchiveCacheManager
             this.MultiDisc = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.M3uName = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.SmartExtract = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.ExtractReadWrite = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.Chdman = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.DolphinTool = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.ExtractXiso = new System.Windows.Forms.DataGridViewCheckBoxColumn();
@@ -538,6 +539,7 @@ namespace ArchiveCacheManager
             this.MultiDisc,
             this.M3uName,
             this.SmartExtract,
+            this.ExtractReadWrite,
             this.Chdman,
             this.DolphinTool,
             this.ExtractXiso});
@@ -805,6 +807,15 @@ namespace ArchiveCacheManager
             this.SmartExtract.ToolTipText = "Only extract a single ROM from an archive if certain conditions are met.";
             this.SmartExtract.Width = 76;
             // 
+            // ExtractReadWrite
+            // 
+            this.ExtractReadWrite.FillWeight = 50F;
+            this.ExtractReadWrite.HeaderText = "Read / Write";
+            this.ExtractReadWrite.Name = "ExtractReadWrite";
+            this.ExtractReadWrite.ToolTipText = "Leave newly extracted files writable instead of marking them read-only. Existing " +
+    "cached files are unchanged until re-extracted.";
+            this.ExtractReadWrite.Width = 74;
+            // 
             // Chdman
             // 
             this.Chdman.HeaderText = "chdman";
@@ -916,6 +927,7 @@ namespace ArchiveCacheManager
         private System.Windows.Forms.DataGridViewCheckBoxColumn MultiDisc;
         private System.Windows.Forms.DataGridViewComboBoxColumn M3uName;
         private System.Windows.Forms.DataGridViewCheckBoxColumn SmartExtract;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn ExtractReadWrite;
         private System.Windows.Forms.DataGridViewCheckBoxColumn Chdman;
         private System.Windows.Forms.DataGridViewCheckBoxColumn DolphinTool;
         private System.Windows.Forms.DataGridViewCheckBoxColumn ExtractXiso;

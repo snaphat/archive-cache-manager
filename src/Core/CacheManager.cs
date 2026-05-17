@@ -101,7 +101,10 @@ namespace ArchiveCacheManager
                 {
                     LaunchInfo.UpdateSizeFromCache(discApp);
                     LaunchInfo.SaveToCache(discApp);
-                    DiskUtils.SetDirectoryContentsReadOnly(LaunchInfo.GetArchiveCachePath(discApp));
+                    if (!LaunchInfo.ExtractReadWriteConfig)
+                    {
+                        DiskUtils.SetDirectoryContentsReadOnly(LaunchInfo.GetArchiveCachePath(discApp));
+                    }
                     File.Delete(PathUtils.GetArchiveCacheExtractingFlagPath(LaunchInfo.GetArchiveCachePath(discApp)));
                 }
                 else

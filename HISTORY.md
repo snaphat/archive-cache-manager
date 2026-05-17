@@ -1,4 +1,27 @@
 # Archive Cache Manager change history
+## Unreleased
+* Update for modern LaunchBox and .NET
+    * Fix build for .NET 9 and LaunchBox >= 13.19
+    * Additional LaunchBox >= 13.19 compatibility updates for the replacement 7-Zip host path
+    * Fix extraction interception for LaunchBox >= 13.27 when LaunchBox extracts into a subdirectory of `ThirdParty\7-Zip\Temp`
+* Update bundled 7-Zip to version 26.01
+* Add per-emulator/platform `Read / Write` extraction setting
+    * Keeps the existing default behaviour of marking extracted files read-only
+    * Allows newly extracted files to be left writable when enabled
+* Multi-disc fixes
+    * Resolve paths during multi-disc path comparisons
+    * Use LaunchBox application IDs instead of disc numbers for internal multi-disc identity, generated ini sections, and selected disc tracking
+    * Generate M3Us with the selected disc first, with remaining discs sorted by disc number and original order
+    * Prevent exceptions during M3U generation when duplicate archive paths exist
+* Fix filename sanitization
+    * Correct Windows reserved file name handling
+    * Use the full set of invalid file name characters from `Path.GetInvalidFileNameChars()`
+    * Correct final path validation and handle empty / whitespace file names
+* Link directory cleanup fixes
+    * Stop deleting linked directories during cache integrity verification
+    * Delete linked directories when clearing cache entries or the entire cache
+    * Validate linked cleanup targets before deleting them
+
 ## v2.16 (2023-02-10)
 * New M3U name option - "Disc 1 Filename"
     * Always use the filename of the first disc of a multi-disc game for the m3u file, regardless of which disc was launched
